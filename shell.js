@@ -1254,8 +1254,9 @@ function execSync(cmd, opts) {
   var script = 
    "var child = require('child_process'), \
         fs = require('fs'); \
-    child.exec('"+escape(cmd)+"', {env: process.env}, function(err) { \
-      fs.writeFileSync('"+escape(codeFile)+"', err ? err.code.toString() : '0'); \
+	process.on('SIGTERM',function(){process.exit(1);}); \
+    	child.exec('"+escape(cmd)+"', {env: process.env}, function(err) { \
+      	fs.writeFileSync('"+escape(codeFile)+"', err ? err.code.toString() : '0'); \
     });";
 
   if (fs.existsSync(scriptFile)) fs.unlinkSync(scriptFile);
@@ -1273,8 +1274,8 @@ function execSync(cmd, opts) {
   // (tried many I/O sync ops, writeFileSync() seems to be only one that is effective in reducing
   // CPU usage, though apparently not so much on Windows)
   if(sleep){
-	  while(!fs.existsSync(codeFile)){updateStdout(); process.nextTick(function(){sleep.usleep(2500);});}
-	  while(!fs.existsSync(stdoutFile)){updateStdout(); process.nextTick(function(){sleep.usleep(2500);});}
+	  while(!fs.existsSync(codeFile)){updateStdout(); process.nextTick(function(){sleep.usleep(0.25 * 1000 * 1000);});}
+	  while(!fs.existsSync(stdoutFile)){updateStdout(); process.nextTick(function(){sleep.usleep(0.25 * 1000 * 1000);});}
   }else{
 	  while (!fs.existsSync(codeFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
 	  while (!fs.existsSync(stdoutFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
