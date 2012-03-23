@@ -13,6 +13,9 @@ var fs = require('fs'),
     child = require('child_process'),
     os = require('os');
 
+var sleep=null;
+try { sleep = require('sleep'); } catch(e){ }
+
 // Node shims for < v0.7
 fs.existsSync = fs.existsSync || path.existsSync;
 
@@ -1269,8 +1272,13 @@ function execSync(cmd, opts) {
   // sleepFile is used as a dummy I/O op to mitigate unnecessary CPU usage
   // (tried many I/O sync ops, writeFileSync() seems to be only one that is effective in reducing
   // CPU usage, though apparently not so much on Windows)
-  while (!fs.existsSync(codeFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
-  while (!fs.existsSync(stdoutFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
+  if(sleep){
+	  while(!fs.existsSync(codeFile)){updateStdout(); process.nextTick(function(){sleep.usleep(2500);});}
+	  while(!fs.existsSync(stdoutFile)){updateStdout(); process.nextTick(function(){sleep.usleep(2500);});}
+  }else{
+	  while (!fs.existsSync(codeFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
+	  while (!fs.existsSync(stdoutFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
+  }
 
   // At this point codeFile exists, but it's not necessarily flushed yet.
   // Keep reading it until it is.
