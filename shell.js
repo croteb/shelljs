@@ -1297,10 +1297,10 @@ function execSync(cmd, opts) {
 
   var stdout = fs.readFileSync(stdoutFile, 'utf8');
 
-  fs.unlinkSync(scriptFile);
-  fs.unlinkSync(stdoutFile);
-  fs.unlinkSync(codeFile);
-  fs.unlinkSync(sleepFile);
+  try{ fs.unlinkSync(scriptFile); } catch(e) {}
+  try{ fs.unlinkSync(stdoutFile); } catch(e) {}
+  try{ fs.unlinkSync(codeFile); } catch(e) {}
+  try{ fs.unlinkSync(sleepFile); } catch(e) {}
 
   // True if successful, false if not
   var obj = {
