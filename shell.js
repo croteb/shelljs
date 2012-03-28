@@ -1251,14 +1251,22 @@ function execSync(cmd, opts) {
     
   cmd += ' > '+stdoutFile+' 2>&1'; // works on both win/unix
 
-  var script = 
-   "var child = require('child_process'), \
+  var script =
+   "var child = require('child_process'), path=require('path'), \
         fs = require('fs'); \
-	process.on('SIGTERM',function(){process.exit(1);}); \
-    	child.exec('"+escape(cmd)+"', {env: process.env}, function(err) { \
-      	fs.writeFileSync('"+escape(codeFile)+"', err ? err.code.toString() : '0'); \
-    });";
-
+    child.exec('"+escape(cmd)+"', {env: process.env}, function(err,stdout,stderr) { \
+      fs.writeFileSync('"+escape(codeFile)+"', err ? err.code.toString() : '0'); \
+      if(!path.existsSync('"+escape(stdoutFile)+"')){ fs.writeFileSync('"+escape(stdoutFile)+"',stdout.toString()+stderr.toString()); }; \
+    }); \
+    process.on('uncaughtException',function(err){ \
+      if(!path.existsSync('"+escape(stdoutFile)+"')){ fs.writeFileSync('"+escape(stdoutFile)+"',err.toString()); } \
+      if(!path.existsSync('"+escape(codeFile)+"')){ fs.writeFileSync('"+escape(codeFile)+"','-1'); } \
+    }); \
+    process.on('exit',function(){ \
+      if(!path.existsSync('"+escape(stdoutFile)+"')){ fs.writeFileSync('"+escape(stdoutFile)+"','Uncaught ShellJS Error'); } \
+      if(!path.existsSync('"+escape(codeFile)+"')){ fs.writeFileSync('"+escape(codeFile)+"','-1'); } \
+    });"
+  
   if (fs.existsSync(scriptFile)) fs.unlinkSync(scriptFile);
   if (fs.existsSync(stdoutFile)) fs.unlinkSync(stdoutFile);
   if (fs.existsSync(codeFile)) fs.unlinkSync(codeFile);
