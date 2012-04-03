@@ -1282,8 +1282,8 @@ function execSync(cmd, opts) {
   // (tried many I/O sync ops, writeFileSync() seems to be only one that is effective in reducing
   // CPU usage, though apparently not so much on Windows)
   if(sleep){
-	  while(!fs.existsSync(codeFile)){updateStdout(); process.nextTick(function(){sleep.usleep(0.25 * 1000 * 1000);});}
-	  while(!fs.existsSync(stdoutFile)){updateStdout(); process.nextTick(function(){sleep.usleep(0.25 * 1000 * 1000);});}
+	  while(!fs.existsSync(codeFile)){updateStdout(); sleep.usleep(0.25 * 1000 * 1000);}
+	  while(!fs.existsSync(stdoutFile)){updateStdout(); sleep.usleep(0.25 * 1000 * 1000);}
   }else{
 	  while (!fs.existsSync(codeFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
 	  while (!fs.existsSync(stdoutFile)) { updateStdout(); fs.writeFileSync(sleepFile, 'a'); };
